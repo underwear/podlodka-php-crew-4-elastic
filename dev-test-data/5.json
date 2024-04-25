@@ -1,7 +1,0 @@
-{
-  "id": 5,
-  "title": "Open Swoole",
-  "body": "Compared with other async programming frameworks or software such as Nginx, Tornado, Node.js, Open Swoole is a complete async solution that has built-in support for async programming via fibers/coroutines, a range of multi-threaded I/O modules (HTTP Server, WebSockets, GRPC, TaskWorkers, Process Pools) and support for popular PHP clients like PDO for MySQL, Redis and CURL.\n\nYou can use sync or async, coroutine, fiber API to write the applications or create thousands of light weight fibers within one Linux process.\n\nOpen Swoole enhances the efficiency of your PHP applications and brings you out of the traditional stateless model, enabling you to focus on the development of innovative products at high scale, bringing event loops and asynchronous programming to the PHP language.",
-  "tags": ["white", "blue"],
-  "date": "2021"
-}

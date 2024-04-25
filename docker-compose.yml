@@ -1,4 +1,4 @@
-version: '3'
+version: '3.7'
 
 services:
   app:
@@ -14,30 +14,56 @@ services:
       - "8000:8000"
     networks:
       - crew-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   elasticsearch:
     container_name: crew-elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.7.1
+    image: elasticsearch:8.11.3
     environment:
-      - CLI_JAVA_OPTS=-Xms2g -Xmx2g
+      - CLI_JAVA_OPTS=-Xms750m -Xmx750m
       - bootstrap.memory_lock=true
       - discovery.type=single-node
       - xpack.security.enabled=false
       - xpack.security.enrollment.enabled=false
     ports:
       - "9200:9200"
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     networks:
       - crew-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health?wait_for_status=yellow&timeout=50s"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
 
   kibana:
     container_name: crew-kibana
-    image: docker.elastic.co/kibana/kibana:8.7.1
-    environment:
-      XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa
+    image: kibana:8.11.3
     ports:
       - "5601:5601"
     networks:
       - crew-network
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 networks:
   crew-network: {}

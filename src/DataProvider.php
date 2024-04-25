@@ -2,24 +2,41 @@
 
 namespace App;
 
+
 class DataProvider
 {
-    private const DIR_PATH = './dev-test-data';
+    private string $filePath;
 
-    /**
-     * @return array<int, string>
-     */
-    public function getJsons(): array
+    public function __construct(string $filePath)
     {
-        $jsonFiles = [];
-        $allFiles = scandir(self::DIR_PATH);
+        $this->filePath = $filePath;
+    }
 
-        foreach ($allFiles as $file) {
-            if (is_file(self::DIR_PATH . '/' . $file) && pathinfo($file, PATHINFO_EXTENSION) === 'json') {
-                $jsonFiles[] = file_get_contents(self::DIR_PATH . '/' . $file);
-            }
+    public function getIterator(): \Generator
+    {
+        // Проверяем, существует ли файл и можно ли его открыть
+        if (!file_exists($this->filePath)) {
+            throw new \Exception("File not found: {$this->filePath}");
         }
 
-        return $jsonFiles;
+        $handle = fopen($this->filePath, "r");
+        if ($handle === false) {
+            throw new \Exception("Cannot open file: {$this->filePath}");
+        }
+
+        // Чтение заголовков для использования в качестве ключей массива
+        $headers = fgetcsv($handle);
+        if ($headers === false) {
+            throw new \Exception("Failed to read headers from file: {$this->filePath}");
+        }
+
+        while (($data = fgetcsv($handle)) !== false) {
+            if ($data === null) {
+                continue; // Пропускаем пустые строки
+            }
+            yield array_combine($headers, $data);
+        }
+
+        fclose($handle);
     }
 }
